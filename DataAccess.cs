@@ -17,7 +17,7 @@ namespace WienerOsiguranje
 
         public DataAccess()
         {
-            connectionString = ConfigurationManager.ConnectionStrings["DatabaseWienerConnection"].ConnectionString;
+            connectionString = "Server=tcp:wienerserver.database.windows.net,1433;Initial Catalog=DatabaseWiener;Persist Security Info=False;User ID=wienerAdmin;Password=PassPass1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
         }
 
         public List<Partner> GetAllPartnersData()
