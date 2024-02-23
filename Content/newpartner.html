@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Wiener partners</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="../../Scripts/ajaxRequests.js"></script>
+    <style>
+        body {
+            background-color: #F57258;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control-feedback {
+            display: none;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+            background-color: #f8d7da;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Creating a new partner</h1>
+    <form id="newPartnerDataForm">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" pattern="[a-zA-Z0-9]+" minlength="2" maxlength="255" required>
+        <br />
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" pattern="[a-zA-Z0-9]+" minlength="2" maxlength="255" required>
+        <br />
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" pattern="[a-zA-Z0-9]+" maxlength="255">
+        <br />
+        <label for="partnerNumber">Partner Number:</label>
+        <input type="number" id="partnerNumber" name="partnerNumber" pattern="\d{20}" required>
+        <br />
+        <label for="croatianPIN">Croatian PIN:</label>
+        <input type="text" id="croatianPIN" name="croatianPIN" pattern="\d{11}">
+        <br />
+        <label for="partnerTypeId">Partner Type ID:</label>
+        <select id="partnerTypeId" name="partnerTypeId" required>
+            <option value="1">Personal</option>
+            <option value="2">Legal</option>
+        </select>
+
+        <br />
+        <label for="createByUser">Created By User:</label>
+        <input type="email" id="createByUser" name="createByUser" maxlength="255" required>
+        <br />
+        <label for="isForeign">Is Foreign:</label>
+        <input type="checkbox" id="isForeign" name="isForeign" required>
+        <br />
+        <label for="externalCode">External Code:</label>
+        <input type="text" id="externalCode" name="externalCode" pattern="[a-zA-Z0-9]{10,20}" required>
+        <br />
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="N">Non-Binary</option>
+        </select>
+        <br />
+        <button id="submitPartner" type="submit">Create partner</button>
+        <button  id="cancelBtn">Cancel</button>
+    </form>
+    <script>
+        $(document).ready(function () {
+            document.getElementById("cancelBtn").addEventListener("click", ReturnToHomePage);
+
+            document.getElementById('submitPartner').addEventListener('click', function (event) {
+                event.preventDefault();
+                var firstName = document.getElementById('firstName').value;
+                var lastName = document.getElementById('lastName').value;
+                var address = document.getElementById('address').value;
+                var partnerNumber = document.getElementById('partnerNumber').value;
+                var croatianPIN = document.getElementById('croatianPIN').value;
+                var partnerTypeId = document.getElementById('partnerTypeId').value;
+                var createByUser = document.getElementById('createByUser').value;
+                var isForeign = document.getElementById('isForeign').checked;
+                var externalCode = document.getElementById('externalCode').value;
+                var gender = document.getElementById('gender').value;
+                var validationResult = checkValidity(firstName, lastName, address, partnerNumber, croatianPIN, partnerTypeId, createByUser, externalCode, gender);
+                if (validationResult.isValid) SendData(firstName, lastName, address, partnerNumber, croatianPIN, partnerTypeId, createByUser, externalCode, isForeign, gender);
+                else alert('Validation failed: ' + validationResult.errorMessage);
+            });
+
+        });
+
+
+        function checkValidity(firstName, lastName, address, partnerNumber, croatianPIN, partnerTypeId, createByUser, externalCode, gender) {
+            // Validate each input based on your requirements
+            if (!/^[a-zA-Z0-9]+$/.test(firstName) || firstName.length < 2 || firstName.length > 255) {
+                return { isValid: false, errorMessage: 'Invalid First Name' };
+            }
+
+            if (!/^[a-zA-Z0-9]+$/.test(lastName) || lastName.length < 2 || lastName.length > 255) {
+                return { isValid: false, errorMessage: 'Invalid Last Name' };
+            }
+
+            if (address && !/^[a-zA-Z0-9]+$/.test(address)) {
+                return { isValid: false, errorMessage: 'Invalid Address' };
+            }
+
+            if (!/^\d{20}$/.test(partnerNumber)) {
+                return { isValid: false, errorMessage: 'Invalid Partner Number' };
+            }
+
+            if (croatianPIN && !/^\d{11}$/.test(croatianPIN)) {
+                return { isValid: false, errorMessage: 'Invalid Croatian PIN' };
+            }
+
+            if (partnerTypeId !== '1' && partnerTypeId !== '2') {
+                return { isValid: false, errorMessage: 'Invalid Partner Type ID' };
+            }
+
+            if (!createByUser || createByUser.length > 255 || !/^\S+@\S+\.\S+$/.test(createByUser)) {
+                return { isValid: false, errorMessage: 'Invalid Created By User' };
+            }
+
+            if (externalCode && (!/^[a-zA-Z0-9]{10,20}$/.test(externalCode))) {
+                return { isValid: false, errorMessage: 'Invalid External Code' };
+            }
+
+            if (gender !== 'M' && gender !== 'F' && gender !== 'N') {
+                return { isValid: false, errorMessage: 'Invalid Gender' };
+            }
+
+            return { isValid: true, errorMessage: '' };
+        }
+        function SendData(firstName, lastName, address, partnerNumber, croatianPIN, partnerTypeId, createByUser, externalCode, isForeign, gender) {
+            AjaxSendNewPartnerData(firstName, lastName, address, partnerNumber, croatianPIN, partnerTypeId, createByUser, externalCode, isForeign, gender);
+        }
+
+        function ReturnToHomePage() {
+            history.back();
+        }
+
+    </script>
+</body>
+</html>
